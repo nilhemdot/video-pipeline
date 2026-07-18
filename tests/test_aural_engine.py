@@ -34,6 +34,7 @@ class TestExtractAudio:
             def __init__(self, *args, stderr=b"error", **kwargs):
                 super().__init__(*args)
                 self.stderr = stderr
+
         mock_ffmpeg.Error = FakeFFmpegError
         mock_input = MagicMock()
         mock_ffmpeg.input.return_value = mock_input
@@ -49,7 +50,10 @@ class TestGetWhisper:
     def test_lazy_loads_model(self, monkeypatch):
         monkeypatch.setattr(aural_engine, "_WHISPER_MODEL", None)
         mock_model = MagicMock()
-        with patch("backend.search_and_index.aural_engine.WhisperModel", return_value=mock_model):
+        with patch(
+            "backend.search_and_index.aural_engine.WhisperModel",
+            return_value=mock_model,
+        ):
             # Patch MODEL_WHISPER_PATH to nonexistent so it uses model name
             monkeypatch.setattr(aural_engine, "MODEL_WHISPER_PATH", "/nonexistent/path")
             result = aural_engine.get_whisper()

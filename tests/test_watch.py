@@ -75,6 +75,7 @@ class TestIsFileStable:
 
         original_exists = os.path.exists
         call_count = [0]
+
         def mock_exists(p):
             call_count[0] += 1
             if call_count[0] > 2:
@@ -184,6 +185,7 @@ class TestInitialScan:
         (tmp_path / "e.xyz").write_bytes(b"e")  # unsupported
 
         queued = []
+
         def mock_enqueue(path, source_type=None):
             queued.append((path, source_type))
             return (len(queued), True)
@@ -198,14 +200,20 @@ class TestInitialScan:
         (subdir / "deep.mp4").write_bytes(b"x")
 
         queued = []
-        monkeypatch.setattr(watch, "enqueue_job", lambda p, source_type=None: (queued.append(p), (1, True))[1])
+        monkeypatch.setattr(
+            watch,
+            "enqueue_job",
+            lambda p, source_type=None: (queued.append(p), (1, True))[1],
+        )
         watch.initial_scan(str(tmp_path))
         assert len(queued) == 1
 
     def test_skips_nonexistent_files(self, tmp_path, monkeypatch):
         # This is an edge case: file exists during os.walk but deleted before enqueue
         (tmp_path / "ghost.mp4").write_bytes(b"x")
-        monkeypatch.setattr(watch, "enqueue_job", MagicMock(side_effect=Exception("file gone")))
+        monkeypatch.setattr(
+            watch, "enqueue_job", MagicMock(side_effect=Exception("file gone"))
+        )
         # Should not raise
         watch.initial_scan(str(tmp_path))
 

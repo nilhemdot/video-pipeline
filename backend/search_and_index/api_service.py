@@ -17,12 +17,15 @@ def _get_runtime_service():
 
 def _get_raw_semantic_search():
     if __package__:
-        from backend.search_and_index.semantic_engine import semantic_search as _raw_semantic_search
+        from backend.search_and_index.semantic_engine import (
+            semantic_search as _raw_semantic_search,
+        )
     else:
         from semantic_engine import semantic_search as _raw_semantic_search
     return _raw_semantic_search
 
-#converts to api standard
+
+# converts to api standard
 def normalize_result_item(item: Dict[Any, Any]) -> Dict[str, Any]:
     return {
         "file_name": item.get("file_name"),
@@ -35,8 +38,9 @@ def normalize_result_item(item: Dict[Any, Any]) -> Dict[str, Any]:
         "semantic_rank": item.get("semantic_rank"),
         "keyword_rank": item.get("keyword_rank"),
         "source_type": item.get("source_type"),
-        "added_at": item.get("added_at")
+        "added_at": item.get("added_at"),
     }
+
 
 def health_status() -> Dict[str, str]:
     try:
@@ -45,17 +49,22 @@ def health_status() -> Dict[str, str]:
     except Exception:
         return {"status": "error", "database": "fail"}
 
+
 def get_jobs(status: Optional[str] = None, limit: int = 100) -> List[Dict[str, Any]]:
     return sql_database.list_jobs(status=status, limit=limit)
+
 
 def get_job_or_none(job_id: int) -> Optional[Dict[str, Any]]:
     return sql_database.get_job(job_id)
 
+
 def retry_job_by_id(job_id: int) -> bool:
     return sql_database.retry_job(job_id)
 
+
 def cancel_job_by_id(job_id: int) -> bool:
     return sql_database.cancel_job(job_id)
+
 
 def search_hybrid(payload: Any) -> List[Dict[str, Any]]:
     runtime_service = _get_runtime_service()
@@ -69,10 +78,9 @@ def search_hybrid(payload: Any) -> List[Dict[str, Any]]:
         folders=payload.folders,
         date_from=payload.date_from,
         date_to=payload.date_to,
-        min_score=payload.min_score
+        min_score=payload.min_score,
     )
     return [normalize_result_item(r) for r in raw_results]
-
 
 
 def search_semantic(query: str, limit: int) -> List[Dict[str, Any]]:
@@ -80,13 +88,18 @@ def search_semantic(query: str, limit: int) -> List[Dict[str, Any]]:
     results = raw_semantic_search(query, limit) or []
     return [normalize_result_item(r) for r in results]
 
+
 def search_keyword(query: str) -> List[Dict[str, Any]]:
     results = sql_database.search_to_json(query) or []
     return [normalize_result_item(r) for r in results]
 
-def ingest_file(file_path: str, source_type: Optional[str] = None, max_retries: int = 3) -> Dict[str, Any]:
+
+def ingest_file(
+    file_path: str, source_type: Optional[str] = None, max_retries: int = 3
+) -> Dict[str, Any]:
     job_id, created = sql_database.enqueue_job(file_path, source_type, max_retries)
     return {"job_id": job_id, "created": created}
+
 
 def ingest_folder(folder_path: str, recursive: bool = True) -> Dict[str, int]:
     supported_exts = {".mp4", ".mkv", ".avi", ".mov", ".webm", ".pdf", ".md", ".txt"}
@@ -106,10 +119,12 @@ def ingest_folder(folder_path: str, recursive: bool = True) -> Dict[str, int]:
 
     return {"queued": queued_count, "skipped_duplicates": skipped_count}
 
+
 def reindex_file(file_path: str) -> Dict[str, Any]:
     sql_database.cancel_jobs_for_path(file_path)
     sql_database.delete_file_records(file_path)
     return ingest_file(file_path)
+
 
 def delete_file(file_path: str):
     sql_database.cancel_jobs_for_path(file_path)
@@ -138,15 +153,19 @@ def run_integrity_check() -> Dict[str, Any]:
 def create_backup(label: Optional[str] = None) -> Dict[str, Any]:
     return sql_database.create_backup(label=label)
 
+
 def get_onboarding_status() -> bool:
     val = sql_database.get_setting("onboarding_completed", "false")
     return val.lower() == "true"
 
+
 def set_onboarding_completed(completed: bool):
     sql_database.set_setting("onboarding_completed", "true" if completed else "false")
 
+
 def get_app_setting(key: str, default: Any = None) -> Any:
     return sql_database.get_setting(key, default)
+
 
 def set_app_setting(key: str, value: Any):
     sql_database.set_setting(key, value)

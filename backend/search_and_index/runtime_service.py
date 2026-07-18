@@ -4,9 +4,18 @@ import sqlite3
 import time
 
 if __package__:
-    from backend.search_and_index.aural_engine import extract_audio, get_duration, get_file_name, transcribe_audio
+    from backend.search_and_index.aural_engine import (
+        extract_audio,
+        get_duration,
+        get_file_name,
+        transcribe_audio,
+    )
     from backend.search_and_index.document_engine import process_pdf, process_file
-    from backend.search_and_index.semantic_engine import save_to_vector_db, save_summary_vector, semantic_search
+    from backend.search_and_index.semantic_engine import (
+        save_to_vector_db,
+        save_summary_vector,
+        semantic_search,
+    )
     from backend.search_and_index.sql_database import (
         DATABASE_PATH,
         fetch_next_job,
@@ -22,7 +31,12 @@ if __package__:
     from backend.search_and_index.summarizer import summary_generator
     from backend.search_and_index.visual_engine import index_video_visually
 else:
-    from aural_engine import extract_audio, get_duration, get_file_name, transcribe_audio
+    from aural_engine import (
+        extract_audio,
+        get_duration,
+        get_file_name,
+        transcribe_audio,
+    )
     from document_engine import process_pdf, process_file
     from semantic_engine import save_to_vector_db, save_summary_vector, semantic_search
     from sql_database import (
@@ -136,17 +150,23 @@ def process_job(job):
                 error_message=None,
             )
         else:
-            update_job_status(job_id, "done", stage="finished", progress=1.0, error_message=None)
+            update_job_status(
+                job_id, "done", stage="finished", progress=1.0, error_message=None
+            )
 
     except Exception as e:
         increment_retry(job_id)
         retries, max_retries = get_job_retries(job_id)
 
         if retries < max_retries:
-            update_job_status(job_id, "queued", stage="retrying", progress=0.0, error_message=str(e))
+            update_job_status(
+                job_id, "queued", stage="retrying", progress=0.0, error_message=str(e)
+            )
             requeue_job(job_id)
         else:
-            update_job_status(job_id, "failed", stage="failed", progress=0.0, error_message=str(e))
+            update_job_status(
+                job_id, "failed", stage="failed", progress=0.0, error_message=str(e)
+            )
 
 
 def worker_loop(poll_interval=1.0, stop_flag=None):
@@ -216,7 +236,9 @@ def _load_meta_by_paths(file_paths):
     return out
 
 
-def _passes_filters(item, source_types, folder_prefixes, date_from_dt, date_to_dt, min_score):
+def _passes_filters(
+    item, source_types, folder_prefixes, date_from_dt, date_to_dt, min_score
+):
     if item["score"] < min_score:
         return False
 

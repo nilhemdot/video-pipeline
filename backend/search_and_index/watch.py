@@ -1,10 +1,21 @@
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+
 if __package__:
-    from backend.search_and_index.sql_database import initialize_db, delete_file_records, enqueue_job, cancel_jobs_for_path
+    from backend.search_and_index.sql_database import (
+        initialize_db,
+        delete_file_records,
+        enqueue_job,
+        cancel_jobs_for_path,
+    )
     from backend.search_and_index.runtime_service import worker_loop
 else:
-    from sql_database import initialize_db, delete_file_records, enqueue_job, cancel_jobs_for_path
+    from sql_database import (
+        initialize_db,
+        delete_file_records,
+        enqueue_job,
+        cancel_jobs_for_path,
+    )
     from runtime_service import worker_loop
 import os
 import time
@@ -74,7 +85,7 @@ class FileHandler(FileSystemEventHandler):
 
         if prev_size <= 0:
             return False
-        #checks before and after size are same
+        # checks before and after size are same
         for _ in range(self._stability_checks):
             time.sleep(self._stability_wait_seconds)
             if not os.path.exists(path):
@@ -104,7 +115,9 @@ class FileHandler(FileSystemEventHandler):
         if path in self._timers:
             self._timers[path].cancel()
 
-        timer = threading.Timer(self._debounce_seconds, self._process_after_debounce, args=(path,))
+        timer = threading.Timer(
+            self._debounce_seconds, self._process_after_debounce, args=(path,)
+        )
         self._timers[path] = timer
         timer.start()
 
@@ -184,4 +197,3 @@ if __name__ == "__main__":
     parser.add_argument("--folder", type=str, default="watch")
     args = parser.parse_args()
     start_watcher(args.folder)
-

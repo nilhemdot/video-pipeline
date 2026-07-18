@@ -15,6 +15,7 @@ from backend.search_and_index import runtime_service as rs
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def stub_search(monkeypatch):
     """Replace semantic_search, search_to_json, and _load_meta_by_paths with stubs."""
@@ -40,6 +41,7 @@ def stub_search(monkeypatch):
 # _result_key
 # ---------------------------------------------------------------------------
 
+
 class TestResultKey:
     def test_same_item_same_key(self):
         a = {"file_path": "/v.mp4", "start": 1.0, "end": 2.0, "text": "hi"}
@@ -63,13 +65,19 @@ class TestResultKey:
 
     def test_absolute_path_normalization(self):
         a = {"file_path": "relative/path.mp4", "start": 0, "end": 1, "text": "x"}
-        b = {"file_path": os.path.abspath("relative/path.mp4"), "start": 0, "end": 1, "text": "x"}
+        b = {
+            "file_path": os.path.abspath("relative/path.mp4"),
+            "start": 0,
+            "end": 1,
+            "text": "x",
+        }
         assert rs._result_key(a) == rs._result_key(b)
 
 
 # ---------------------------------------------------------------------------
 # _rrf_add
 # ---------------------------------------------------------------------------
+
 
 class TestRRFAdd:
     def test_single_item_gets_score(self):
@@ -108,6 +116,7 @@ class TestRRFAdd:
 # _parse_date
 # ---------------------------------------------------------------------------
 
+
 class TestParseDate:
     def test_full_datetime(self):
         d = rs._parse_date("2026-07-18 12:00:00")
@@ -137,6 +146,7 @@ class TestParseDate:
 # ---------------------------------------------------------------------------
 # _passes_filters
 # ---------------------------------------------------------------------------
+
 
 class TestPassesFilters:
     base_item = {
@@ -172,6 +182,7 @@ class TestPassesFilters:
 # hybrid_search_rrf
 # ---------------------------------------------------------------------------
 
+
 class TestHybridSearchRRF:
     def test_empty_results(self, stub_search):
         sem, kw = stub_search
@@ -180,21 +191,31 @@ class TestHybridSearchRRF:
 
     def test_semantic_only(self, stub_search):
         sem, kw = stub_search
-        sem.append({"file_path": "/v.mp4", "start": 0, "end": 1, "text": "test", "score": 0.9})
+        sem.append(
+            {"file_path": "/v.mp4", "start": 0, "end": 1, "text": "test", "score": 0.9}
+        )
         results = rs.hybrid_search_rrf("test", limit=10)
         assert len(results) == 1
         assert "semantic" in results[0]["matched_by"]
 
     def test_keyword_only(self, stub_search):
         sem, kw = stub_search
-        kw.append({"file_path": "/v.mp4", "start": 0, "end": 1, "text": "test", "score": 0.8})
+        kw.append(
+            {"file_path": "/v.mp4", "start": 0, "end": 1, "text": "test", "score": 0.8}
+        )
         results = rs.hybrid_search_rrf("test", limit=10)
         assert len(results) == 1
         assert "keyword" in results[0]["matched_by"]
 
     def test_merged_result_from_both(self, stub_search):
         sem, kw = stub_search
-        item = {"file_path": "/v.mp4", "start": 0, "end": 1, "text": "test", "score": 0.9}
+        item = {
+            "file_path": "/v.mp4",
+            "start": 0,
+            "end": 1,
+            "text": "test",
+            "score": 0.9,
+        }
         sem.append(item)
         kw.append(item)
         results = rs.hybrid_search_rrf("test", limit=10)
@@ -207,21 +228,39 @@ class TestHybridSearchRRF:
     def test_limit_applied(self, stub_search):
         sem, kw = stub_search
         for i in range(10):
-            sem.append({"file_path": f"/v{i}.mp4", "start": 0, "end": 1, "text": str(i), "score": 0.1 * i})
+            sem.append(
+                {
+                    "file_path": f"/v{i}.mp4",
+                    "start": 0,
+                    "end": 1,
+                    "text": str(i),
+                    "score": 0.1 * i,
+                }
+            )
         results = rs.hybrid_search_rrf("test", limit=5)
         assert len(results) == 5
 
     def test_sorted_by_score_desc(self, stub_search):
         sem, kw = stub_search
         for i in range(5):
-            sem.append({"file_path": f"/v{i}.mp4", "start": 0, "end": 1, "text": str(i), "score": 0.1})
+            sem.append(
+                {
+                    "file_path": f"/v{i}.mp4",
+                    "start": 0,
+                    "end": 1,
+                    "text": str(i),
+                    "score": 0.1,
+                }
+            )
         results = rs.hybrid_search_rrf("test", limit=10)
         scores = [r["score"] for r in results]
         assert scores == sorted(scores, reverse=True)
 
     def test_min_score_filter(self, stub_search):
         sem, kw = stub_search
-        sem.append({"file_path": "/v.mp4", "start": 0, "end": 1, "text": "test", "score": 0.01})
+        sem.append(
+            {"file_path": "/v.mp4", "start": 0, "end": 1, "text": "test", "score": 0.01}
+        )
         results = rs.hybrid_search_rrf("test", limit=10, min_score=0.1)
         assert len(results) == 0
 
@@ -229,6 +268,7 @@ class TestHybridSearchRRF:
 # ---------------------------------------------------------------------------
 # process_media dispatch
 # ---------------------------------------------------------------------------
+
 
 class TestProcessMediaDispatch:
     def test_unsupported_extension_raises(self, tmp_path, monkeypatch):

@@ -17,7 +17,13 @@ class TestSentenceWindow:
         assert result[0] == ["hello"]
 
     def test_window_size_3(self):
-        data = [{"text": "a"}, {"text": "b"}, {"text": "c"}, {"text": "d"}, {"text": "e"}]
+        data = [
+            {"text": "a"},
+            {"text": "b"},
+            {"text": "c"},
+            {"text": "d"},
+            {"text": "e"},
+        ]
         result = semantic_engine.sentence_window(data, window_size=3)
         assert len(result) == 5
         # Index 0: [a, b], index 2: [b, c, d], index 4: [d, e]
@@ -65,7 +71,9 @@ class TestEmbed:
 class TestGetModel:
     def test_raises_if_model_missing(self, monkeypatch):
         monkeypatch.setattr(semantic_engine, "_MODEL", None)
-        monkeypatch.setattr(semantic_engine, "MODEL_SEMANTIC_PATH", "/nonexistent/model")
+        monkeypatch.setattr(
+            semantic_engine, "MODEL_SEMANTIC_PATH", "/nonexistent/model"
+        )
         with pytest.raises(RuntimeError, match="Semantic model not found"):
             semantic_engine.get_model()
 
@@ -73,6 +81,7 @@ class TestGetModel:
     def test_lazy_loads_once(self, mock_st, monkeypatch):
         monkeypatch.setattr(semantic_engine, "_MODEL", None)
         import tempfile
+
         fake_model_dir = tempfile.mkdtemp()
         monkeypatch.setattr(semantic_engine, "MODEL_SEMANTIC_PATH", fake_model_dir)
         mock_st.return_value = MagicMock()
@@ -90,7 +99,9 @@ class TestSaveToVectorDB:
         mock_db = MagicMock()
         mock_db.table_names.return_value = []
         mock_lancedb.connect.return_value = mock_db
-        semantic_engine.save_to_vector_db(1, "v.mp4", "/v.mp4", [{"start": 0, "end": 5, "text": "hello"}])
+        semantic_engine.save_to_vector_db(
+            1, "v.mp4", "/v.mp4", [{"start": 0, "end": 5, "text": "hello"}]
+        )
         mock_db.create_table.assert_called_once()
 
     @patch("backend.search_and_index.semantic_engine.lancedb")
@@ -102,7 +113,9 @@ class TestSaveToVectorDB:
         mock_db.table_names.return_value = ["semantic_segments"]
         mock_db.open_table.return_value = mock_table
         mock_lancedb.connect.return_value = mock_db
-        semantic_engine.save_to_vector_db(1, "v.mp4", "/v.mp4", [{"start": 0, "end": 5, "text": "hello"}])
+        semantic_engine.save_to_vector_db(
+            1, "v.mp4", "/v.mp4", [{"start": 0, "end": 5, "text": "hello"}]
+        )
         mock_table.add.assert_called_once()
 
     @patch("backend.search_and_index.semantic_engine.lancedb")

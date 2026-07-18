@@ -16,6 +16,7 @@ from backend.search_and_index import sql_database as db
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def temp_db(tmp_path, monkeypatch):
     """Redirect all DB + vector paths to a temp dir."""
@@ -39,11 +40,13 @@ def temp_file(tmp_path):
 # initialize_db
 # ---------------------------------------------------------------------------
 
+
 class TestInitializeDB:
     def test_creates_all_tables(self, temp_db):
         with sqlite3.connect(temp_db.DATABASE_PATH) as conn:
             tables = {
-                r[0] for r in conn.execute(
+                r[0]
+                for r in conn.execute(
                     "SELECT name FROM sqlite_master WHERE type='table'"
                 )
             }
@@ -65,6 +68,7 @@ class TestInitializeDB:
 # ---------------------------------------------------------------------------
 # compute_file_hash
 # ---------------------------------------------------------------------------
+
 
 class TestComputeFileHash:
     def test_returns_sha256_hex(self, temp_file):
@@ -89,6 +93,7 @@ class TestComputeFileHash:
 # should_process
 # ---------------------------------------------------------------------------
 
+
 class TestShouldProcess:
     def test_new_file_should_process(self, temp_db, temp_file):
         should, h = temp_db.should_process(temp_file)
@@ -102,7 +107,9 @@ class TestShouldProcess:
 
     def test_unchanged_file_should_not_process(self, temp_db, temp_file):
         temp_db.save_to_db(
-            temp_file, "sample.mp4", 60.0,
+            temp_file,
+            "sample.mp4",
+            60.0,
             [{"start": 0, "end": 5, "text": "hello"}],
             current_hash=temp_db.compute_file_hash(temp_file),
         )
@@ -111,7 +118,9 @@ class TestShouldProcess:
 
     def test_changed_file_should_process(self, temp_db, temp_file):
         temp_db.save_to_db(
-            temp_file, "sample.mp4", 60.0,
+            temp_file,
+            "sample.mp4",
+            60.0,
             [{"start": 0, "end": 5, "text": "hello"}],
             current_hash="old_hash",
         )
@@ -123,10 +132,13 @@ class TestShouldProcess:
 # save_to_db
 # ---------------------------------------------------------------------------
 
+
 class TestSaveToDB:
     def test_inserts_new_media(self, temp_db, temp_file):
         media_id = temp_db.save_to_db(
-            temp_file, "sample.mp4", 60.0,
+            temp_file,
+            "sample.mp4",
+            60.0,
             [{"start": 0, "end": 5, "text": "hello world"}],
         )
         assert media_id is not None
@@ -134,18 +146,24 @@ class TestSaveToDB:
 
     def test_updates_existing_media(self, temp_db, temp_file):
         mid1 = temp_db.save_to_db(
-            temp_file, "sample.mp4", 60.0,
+            temp_file,
+            "sample.mp4",
+            60.0,
             [{"start": 0, "end": 5, "text": "hello"}],
         )
         mid2 = temp_db.save_to_db(
-            temp_file, "sample.mp4", 62.0,
+            temp_file,
+            "sample.mp4",
+            62.0,
             [{"start": 0, "end": 5, "text": "updated transcript"}],
         )
         assert mid1 == mid2
 
     def test_transcript_fts_populated(self, temp_db, temp_file):
         temp_db.save_to_db(
-            temp_file, "sample.mp4", 60.0,
+            temp_file,
+            "sample.mp4",
+            60.0,
             [{"start": 0, "end": 5, "text": "unique keyword applesauce"}],
         )
         results = temp_db.search_to_json("applesauce")
@@ -157,6 +175,7 @@ class TestSaveToDB:
 # search_to_json (keyword search)
 # ---------------------------------------------------------------------------
 
+
 class TestSearchToJSON:
     def test_finds_matching_text(self, temp_db, tmp_path):
         f1 = tmp_path / "a.mp4"
@@ -164,11 +183,15 @@ class TestSearchToJSON:
         f2 = tmp_path / "b.mp4"
         f2.write_bytes(b"b")
         temp_db.save_to_db(
-            str(f1), "a.mp4", 10.0,
+            str(f1),
+            "a.mp4",
+            10.0,
             [{"start": 0, "end": 5, "text": "machine learning is fun"}],
         )
         temp_db.save_to_db(
-            str(f2), "b.mp4", 10.0,
+            str(f2),
+            "b.mp4",
+            10.0,
             [{"start": 0, "end": 5, "text": "cooking pasta recipe"}],
         )
         results = temp_db.search_to_json("machine")
@@ -183,7 +206,9 @@ class TestSearchToJSON:
         f = tmp_path / "v.mp4"
         f.write_bytes(b"x")
         temp_db.save_to_db(
-            str(f), "v.mp4", 10.0,
+            str(f),
+            "v.mp4",
+            10.0,
             [{"start": 1, "end": 2, "text": "searchable content here"}],
         )
         results = temp_db.search_to_json("searchable")
@@ -200,6 +225,7 @@ class TestSearchToJSON:
 # ---------------------------------------------------------------------------
 # Job Queue
 # ---------------------------------------------------------------------------
+
 
 class TestJobQueue:
     def test_enqueue_creates_job(self, temp_db, temp_file):

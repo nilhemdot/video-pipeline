@@ -52,7 +52,9 @@ class TestHybridSearchRequest:
 
     def test_custom_values_accepted(self):
         req = HybridSearchRequest(
-            query="test", limit=50, k=100,
+            query="test",
+            limit=50,
+            k=100,
             source_types=["video", "pdf"],
             folders=["/media"],
             min_score=0.5,
@@ -65,9 +67,7 @@ class TestHybridSearchRequest:
 
 class TestHybridResultItem:
     def test_minimal_valid(self):
-        item = HybridResultItem(
-            file_path="/v.mp4", score=0.5, matched_by=["semantic"]
-        )
+        item = HybridResultItem(file_path="/v.mp4", score=0.5, matched_by=["semantic"])
         assert item.file_path == "/v.mp4"
         assert item.score == 0.5
         assert item.matched_by == ["semantic"]
@@ -91,9 +91,15 @@ class TestHybridResultItem:
 class TestJobItem:
     def test_valid(self):
         job = JobItem(
-            id=1, file_path="/v.mp4", source_type="video",
-            status="queued", stage="pending", progress=0.0,
-            retries=0, max_retries=3, error_message=None,
+            id=1,
+            file_path="/v.mp4",
+            source_type="video",
+            status="queued",
+            stage="pending",
+            progress=0.0,
+            retries=0,
+            max_retries=3,
+            error_message=None,
             created_at="2026-01-01 00:00:00",
             updated_at="2026-01-01 00:00:00",
         )

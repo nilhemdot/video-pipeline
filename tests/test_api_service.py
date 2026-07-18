@@ -13,12 +13,26 @@ from backend.search_and_index import api_service
 def mock_db(monkeypatch):
     """Stub all sql_database functions."""
     from backend.search_and_index import sql_database
+
     mocks = {}
     funcs = [
-        "initialize_db", "get_jobs", "list_jobs", "get_job", "retry_job", "cancel_job",
-        "search_to_json", "enqueue_job", "get_db_stats", "integrity_check",
-        "create_backup", "get_media_detail", "get_media_segments",
-        "cancel_jobs_for_path", "delete_file_records", "get_setting", "set_setting",
+        "initialize_db",
+        "get_jobs",
+        "list_jobs",
+        "get_job",
+        "retry_job",
+        "cancel_job",
+        "search_to_json",
+        "enqueue_job",
+        "get_db_stats",
+        "integrity_check",
+        "create_backup",
+        "get_media_detail",
+        "get_media_segments",
+        "cancel_jobs_for_path",
+        "delete_file_records",
+        "get_setting",
+        "set_setting",
     ]
     for fn_name in funcs:
         mock = MagicMock(return_value={})
@@ -89,7 +103,14 @@ class TestCancelJobById:
 class TestSearchKeyword:
     def test_returns_normalized_results(self, mock_db):
         mock_db["search_to_json"].return_value = [
-            {"file_name": "v.mp4", "file_path": "/v.mp4", "start": 0, "end": 1, "text": "test", "score": 0.5}
+            {
+                "file_name": "v.mp4",
+                "file_path": "/v.mp4",
+                "start": 0,
+                "end": 1,
+                "text": "test",
+                "score": 0.5,
+            }
         ]
         result = api_service.search_keyword("test")
         assert len(result) == 1
@@ -194,10 +215,15 @@ class TestOnboarding:
 class TestNormalizeResultItem:
     def test_normalizes_fields(self):
         item = {
-            "file_name": "v.mp4", "file_path": "/v.mp4",
-            "start": 0, "end": 1, "text": "hello",
-            "score": 0.9, "matched_by": ["semantic"],
-            "source_type": "video", "added_at": "2026-01-01",
+            "file_name": "v.mp4",
+            "file_path": "/v.mp4",
+            "start": 0,
+            "end": 1,
+            "text": "hello",
+            "score": 0.9,
+            "matched_by": ["semantic"],
+            "source_type": "video",
+            "added_at": "2026-01-01",
         }
         result = api_service.normalize_result_item(item)
         assert result["file_name"] == "v.mp4"

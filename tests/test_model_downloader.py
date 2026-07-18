@@ -69,7 +69,9 @@ class TestEnsureVisualModel:
 class TestEnsureSummarizerModel:
     @patch("backend.search_and_index.model_downloader.AutoModelForSeq2SeqLM")
     @patch("backend.search_and_index.model_downloader.AutoTokenizer")
-    def test_downloads_if_missing(self, mock_tok_cls, mock_model_cls, monkeypatch, tmp_path):
+    def test_downloads_if_missing(
+        self, mock_tok_cls, mock_model_cls, monkeypatch, tmp_path
+    ):
         model_path = str(tmp_path / "summarizer_model")
         monkeypatch.setattr(md, "MODEL_SUMMARIZER_PATH", model_path)
         monkeypatch.setattr(os.path, "exists", lambda p: False)

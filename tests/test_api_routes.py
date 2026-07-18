@@ -16,6 +16,7 @@ def client(monkeypatch, tmp_path):
 
     # Patch DB + worker before importing app (app starts worker in lifespan)
     from backend.search_and_index import sql_database
+
     monkeypatch.setattr(sql_database, "DATABASE_PATH", str(tmp_path / "test.db"))
     monkeypatch.setattr(sql_database, "VECTOR_DB_PATH", str(tmp_path / "vectors"))
     monkeypatch.setattr(sql_database, "THUMBNAIL_PATH", str(tmp_path / "thumbs"))
@@ -23,10 +24,12 @@ def client(monkeypatch, tmp_path):
 
     # Patch worker loop to do nothing
     from backend.search_and_index import runtime_service
+
     monkeypatch.setattr(runtime_service, "worker_loop", lambda **kw: None)
 
     # Patch the watch module's initial_scan + FileHandler so lifespan doesn't fail
     from backend.search_and_index import watch
+
     monkeypatch.setattr(watch, "initial_scan", lambda folder: None)
     monkeypatch.setattr(watch, "FileHandler", MagicMock)
 
@@ -37,6 +40,7 @@ def client(monkeypatch, tmp_path):
     monkeypatch.setattr("watchdog.observers.Observer", mock_observer_class)
 
     from backend.search_and_index.api_app import app
+
     with TestClient(app) as c:
         yield c
 
@@ -48,11 +52,24 @@ def mock_api_service(monkeypatch):
 
     mocks = {}
     funcs = [
-        "health_status", "system_status", "run_integrity_check", "create_backup",
-        "get_jobs", "get_job_or_none", "retry_job_by_id", "cancel_job_by_id",
-        "search_hybrid", "search_semantic", "search_keyword",
-        "ingest_file", "ingest_folder", "delete_file", "reindex_file",
-        "get_media_by_id", "get_media_segments", "get_media_list",
+        "health_status",
+        "system_status",
+        "run_integrity_check",
+        "create_backup",
+        "get_jobs",
+        "get_job_or_none",
+        "retry_job_by_id",
+        "cancel_job_by_id",
+        "search_hybrid",
+        "search_semantic",
+        "search_keyword",
+        "ingest_file",
+        "ingest_folder",
+        "delete_file",
+        "reindex_file",
+        "get_media_by_id",
+        "get_media_segments",
+        "get_media_list",
     ]
     for fn_name in funcs:
         mock = MagicMock(return_value={})
@@ -67,9 +84,13 @@ def mock_api_service(monkeypatch):
 # Health + System routes
 # ---------------------------------------------------------------------------
 
+
 class TestSystemRoutes:
     def test_health_ok(self, client, mock_api_service):
-        mock_api_service["health_status"].return_value = {"status": "up", "database": "ok"}
+        mock_api_service["health_status"].return_value = {
+            "status": "up",
+            "database": "ok",
+        }
         resp = client.get("/api/v1/health")
         assert resp.status_code == 200
         data = resp.json()
@@ -77,7 +98,10 @@ class TestSystemRoutes:
         assert data["data"]["status"] == "up"
 
     def test_health_db_error(self, client, mock_api_service):
-        mock_api_service["health_status"].return_value = {"status": "error", "database": "fail"}
+        mock_api_service["health_status"].return_value = {
+            "status": "error",
+            "database": "fail",
+        }
         resp = client.get("/api/v1/health")
         assert resp.status_code == 503
 
@@ -88,7 +112,10 @@ class TestSystemRoutes:
         assert resp.json()["data"]["jobs"] == 5
 
     def test_system_integrity(self, client, mock_api_service):
-        mock_api_service["run_integrity_check"].return_value = {"ok": True, "errors": []}
+        mock_api_service["run_integrity_check"].return_value = {
+            "ok": True,
+            "errors": [],
+        }
         resp = client.get("/api/v1/system/integrity")
         assert resp.status_code == 200
         assert resp.json()["data"]["ok"] is True
@@ -103,6 +130,7 @@ class TestSystemRoutes:
 # ---------------------------------------------------------------------------
 # Jobs routes
 # ---------------------------------------------------------------------------
+
 
 class TestJobsRoutes:
     def test_list_jobs_empty(self, client, mock_api_service):
@@ -133,10 +161,17 @@ class TestJobsRoutes:
 
     def test_get_job_found(self, client, mock_api_service):
         mock_api_service["get_job_or_none"].return_value = {
-            "id": 5, "file_path": "/v.mp4", "source_type": "video",
-            "status": "done", "stage": "finished", "progress": 1.0,
-            "retries": 0, "max_retries": 3, "error_message": None,
-            "created_at": "2026-01-01 00:00:00", "updated_at": "2026-01-01 00:00:00",
+            "id": 5,
+            "file_path": "/v.mp4",
+            "source_type": "video",
+            "status": "done",
+            "stage": "finished",
+            "progress": 1.0,
+            "retries": 0,
+            "max_retries": 3,
+            "error_message": None,
+            "created_at": "2026-01-01 00:00:00",
+            "updated_at": "2026-01-01 00:00:00",
         }
         resp = client.get("/api/v1/jobs/5")
         assert resp.status_code == 200
@@ -173,6 +208,7 @@ class TestJobsRoutes:
 # ---------------------------------------------------------------------------
 # Search routes
 # ---------------------------------------------------------------------------
+
 
 class TestSearchRoutes:
     def test_hybrid_search(self, client, mock_api_service):
@@ -214,6 +250,7 @@ class TestSearchRoutes:
 # Ingest routes
 # ---------------------------------------------------------------------------
 
+
 class TestIngestRoutes:
     def test_ingest_file(self, client, mock_api_service):
         mock_api_service["ingest_file"].return_value = {"job_id": 1, "created": True}
@@ -223,7 +260,9 @@ class TestIngestRoutes:
 
     def test_ingest_file_with_source_type(self, client, mock_api_service):
         mock_api_service["ingest_file"].return_value = {"job_id": 2, "created": True}
-        resp = client.post("/api/v1/ingest/file", json={"file_path": "/d.pdf", "source_type": "pdf"})
+        resp = client.post(
+            "/api/v1/ingest/file", json={"file_path": "/d.pdf", "source_type": "pdf"}
+        )
         assert resp.status_code == 200
         mock_api_service["ingest_file"].assert_called_with("/d.pdf", "pdf", 3)
 
@@ -238,7 +277,9 @@ class TestIngestRoutes:
 
     def test_ingest_folder(self, client, mock_api_service):
         mock_api_service["ingest_folder"].return_value = {"queued": 5, "skipped": 2}
-        resp = client.post("/api/v1/ingest/folder", json={"folder_path": "/media", "recursive": True})
+        resp = client.post(
+            "/api/v1/ingest/folder", json={"folder_path": "/media", "recursive": True}
+        )
         assert resp.status_code == 200
         assert resp.json()["data"]["queued"] == 5
 
@@ -251,6 +292,7 @@ class TestIngestRoutes:
 # ---------------------------------------------------------------------------
 # Response envelope structure
 # ---------------------------------------------------------------------------
+
 
 class TestResponseEnvelope:
     def test_success_envelope_structure(self, client, mock_api_service):

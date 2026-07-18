@@ -39,6 +39,7 @@ class TestProcessFile:
         f.write_text("Para one.\n\nPara two.\n\nPara three.")
 
         captured_segments = []
+
         def capture_summary(data):
             captured_segments.extend(data)
             return "summary"
@@ -59,6 +60,7 @@ class TestProcessFile:
         f.write_text("Real content.\n\n\n\n\n\nAlso real.")
 
         captured = []
+
         def capture(data):
             captured.extend(data)
             return "summary"
@@ -76,6 +78,7 @@ class TestProcessFile:
         f.write_text("Content.")
 
         captured = []
+
         def capture(data):
             captured.extend(data)
             return "summary"
@@ -132,10 +135,12 @@ class TestProcessPdf:
         mock_doc.close = MagicMock()
 
         import sys
+
         fitz_mock = sys.modules.get("fitz", MagicMock())
         fitz_mock.open.return_value = mock_doc
 
         captured = []
+
         def capture(data):
             captured.extend(data)
             return "summary"
@@ -169,10 +174,12 @@ class TestProcessPdf:
         mock_doc.close = MagicMock()
 
         import sys
+
         fitz_mock = sys.modules.get("fitz", MagicMock())
         fitz_mock.open.return_value = mock_doc
 
         captured = []
+
         def capture(data):
             captured.extend(data)
             return "summary"
@@ -198,6 +205,7 @@ class TestProcessPdf:
         mock_doc.close = MagicMock()
 
         import sys
+
         fitz_mock = sys.modules.get("fitz", MagicMock())
         fitz_mock.open.return_value = mock_doc
 
@@ -221,6 +229,7 @@ class TestProcessPdf:
         mock_doc.close = MagicMock()
 
         import sys
+
         fitz_mock = sys.modules.get("fitz", MagicMock())
         fitz_mock.open.return_value = mock_doc
 

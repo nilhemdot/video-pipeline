@@ -44,4 +44,3 @@ async def ingest_folder(req: FolderIngestRequest):
 async def reindex_file(req: ReindexRequest):
     data = api_service.reindex_file(req.file_path)
     return {"ok": True, "data": data}
-

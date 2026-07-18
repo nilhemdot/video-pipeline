@@ -2,19 +2,23 @@ from pydantic import BaseModel, Field
 from typing import List, Optional, Generic, TypeVar, Literal, Union
 
 
-T = TypeVar('T')
+T = TypeVar("T")
+
 
 class ErrorBody(BaseModel):
     code: str
     message: str
 
+
 class EnvelopeSuccess(BaseModel, Generic[T]):
     ok: Literal[True] = True
     data: T
 
+
 class EnvelopeError(BaseModel):
     ok: Literal[False] = False
     error: ErrorBody
+
 
 class HybridSearchRequest(BaseModel):
     query: str = Field(min_length=1)
@@ -28,6 +32,7 @@ class HybridSearchRequest(BaseModel):
     date_to: Optional[str] = None
     min_score: float = Field(default=0.0, ge=0.0)
 
+
 class HybridResultItem(BaseModel):
     file_name: Optional[str] = None
     file_path: str
@@ -40,6 +45,7 @@ class HybridResultItem(BaseModel):
     keyword_rank: Optional[int] = None
     source_type: Optional[str] = None
     added_at: Optional[str] = None
+
 
 class JobItem(BaseModel):
     id: int

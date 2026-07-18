@@ -13,9 +13,10 @@ import os
 
 import sys
 
-if getattr(sys, 'frozen', False):
+if getattr(sys, "frozen", False):
     # Running in a PyInstaller bundle
     import os
+
     PROJECT_ROOT = os.path.expanduser("~/.tobu")
     os.makedirs(PROJECT_ROOT, exist_ok=True)
 else:
@@ -31,8 +32,10 @@ DEFAULT_WATCH_FOLDER = os.environ.get(
 _stop_worker = False
 _watcher_observer = None
 
+
 def _worker_stop_flag():
     return _stop_worker
+
 
 def get_observer():
     return _watcher_observer
@@ -48,8 +51,10 @@ async def lifespan(app: FastAPI):
     # Start the runtime worker loop in a background daemon thread
     try:
         from backend.search_and_index import sql_database
+
         sql_database.initialize_db()
         from backend.search_and_index import runtime_service
+
         worker_thread = threading.Thread(
             target=runtime_service.worker_loop,
             kwargs={"poll_interval": 1.0, "stop_flag": _worker_stop_flag},
@@ -60,7 +65,9 @@ async def lifespan(app: FastAPI):
         print("[TOBU] Runtime worker started (background thread)")
     except Exception as e:
         print(f"[TOBU] Warning: Could not start runtime worker: {e}")
-        print("[TOBU] API server running without auto-processing (install dependencies to enable)")
+        print(
+            "[TOBU] API server running without auto-processing (install dependencies to enable)"
+        )
 
     try:
         from backend.search_and_index.watch import FileHandler, initial_scan
@@ -113,12 +120,10 @@ async def http_exception_handler(request: Request, exc: HTTPException):
     else:
         content = {
             "ok": False,
-            "error": {
-                "code": f"http_{exc.status_code}",
-                "message": str(detail)
-            }
+            "error": {"code": f"http_{exc.status_code}", "message": str(detail)},
         }
     return JSONResponse(status_code=exc.status_code, content=content)
+
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
@@ -128,13 +133,16 @@ async def global_exception_handler(request: Request, exc: Exception):
             "ok": False,
             "error": {
                 "code": "internal_error",
-                "message": "An unexpected error occurred."
-            }
-        }
+                "message": "An unexpected error occurred.",
+            },
+        },
     )
+
 
 if __name__ == "__main__":
     import multiprocessing
+
     multiprocessing.freeze_support()
     import uvicorn
+
     uvicorn.run(app, host="127.0.0.1", port=8000)

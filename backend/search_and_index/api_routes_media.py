@@ -11,20 +11,29 @@ from backend.search_and_index import api_service
 
 user_added_dirs = set()
 
+
 class OpenMediaRequest(BaseModel):
     file_path: str
 
+
 router = APIRouter(prefix="/api/v1/media", tags=["Media"])
 
+
 @router.get("/serve", response_class=FileResponse)
-async def serve_file(file_path: str = Query(..., description="Absolute or relative path to the file to serve")):
+async def serve_file(
+    file_path: str = Query(
+        ..., description="Absolute or relative path to the file to serve"
+    ),
+):
     # 1. Decode URL safely
     decoded_path = urllib.parse.unquote(file_path)
 
     base_dir = Path(__file__).resolve().parent.parent.parent
     watch_dir = base_dir / "watch"
 
-    ALLOWED_BASE_DIRS = [watch_dir.resolve()] + [Path(d).resolve() for d in user_added_dirs]
+    ALLOWED_BASE_DIRS = [watch_dir.resolve()] + [
+        Path(d).resolve() for d in user_added_dirs
+    ]
 
     path_obj = Path(decoded_path)
     if not path_obj.is_absolute():
@@ -43,7 +52,9 @@ async def serve_file(file_path: str = Query(..., description="Absolute or relati
             continue
 
     if not is_allowed:
-        raise HTTPException(status_code=403, detail="Forbidden: Path not in allowed directories")
+        raise HTTPException(
+            status_code=403, detail="Forbidden: Path not in allowed directories"
+        )
 
     # File existence check
     if not resolved_path.is_file():
@@ -63,7 +74,9 @@ async def open_media_native(payload: OpenMediaRequest):
 
     base_dir = Path(__file__).resolve().parent.parent.parent
     watch_dir = base_dir / "watch"
-    ALLOWED_BASE_DIRS = [watch_dir.resolve()] + [Path(d).resolve() for d in user_added_dirs]
+    ALLOWED_BASE_DIRS = [watch_dir.resolve()] + [
+        Path(d).resolve() for d in user_added_dirs
+    ]
 
     path_obj = Path(decoded_path)
     if not path_obj.is_absolute():
@@ -81,26 +94,30 @@ async def open_media_native(payload: OpenMediaRequest):
             continue
 
     if not is_allowed:
-        raise HTTPException(status_code=403, detail="Forbidden: Path not in allowed directories")
+        raise HTTPException(
+            status_code=403, detail="Forbidden: Path not in allowed directories"
+        )
 
     # File existence check
     if not resolved_path.is_file():
         raise HTTPException(status_code=404, detail=f"File not found: {resolved_path}")
 
     try:
-        if os.name == 'nt':
+        if os.name == "nt":
             os.startfile(resolved_path)
-        elif sys.platform == 'darwin':
-            subprocess.run(['open', resolved_path], check=True)
+        elif sys.platform == "darwin":
+            subprocess.run(["open", resolved_path], check=True)
         else:
-            subprocess.run(['xdg-open', resolved_path], check=True)
+            subprocess.run(["xdg-open", resolved_path], check=True)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
     return {"ok": True, "data": {"message": "Opened successfully"}}
 
+
 class AllowDirRequest(BaseModel):
     directory_path: str
+
 
 @router.post("/allow-dir")
 async def allow_directory(payload: AllowDirRequest):

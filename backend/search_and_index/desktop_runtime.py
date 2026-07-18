@@ -8,7 +8,7 @@ import traceback
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
-if getattr(sys, 'frozen', False):
+if getattr(sys, "frozen", False):
     ROOT_DIR = Path(os.path.expanduser("~/.tobu"))
     ROOT_DIR.mkdir(parents=True, exist_ok=True)
 else:
@@ -42,6 +42,7 @@ def _preflight_checks():
     if not (BASE_DIR / "watch.py").exists():
         raise RuntimeError("Missing watch.py in backend/search_and_index")
 
+
 def health_check():
     try:
         db_path = ROOT_DIR / "data" / "database" / "brain.db"
@@ -51,6 +52,7 @@ def health_check():
         return True, "ok"
     except Exception as e:
         return False, str(e)
+
 
 def _spawn(name, args):
     return subprocess.Popen(
@@ -77,10 +79,12 @@ def _classify_exit(name, returncode):
         return "possible_manual_interrupt"
     return "crash"
 
+
 def start_children():
     PROCS["worker"] = _spawn("worker", ["main.py", "--mode", "worker"])
     PROCS["watcher"] = _spawn("watcher", ["watch.py", "--folder", WATCH_FOLDER])
     _log("started child processes: worker, watcher")
+
 
 def stop_children():
     for _, p in PROCS.items():
@@ -96,16 +100,21 @@ def stop_children():
             p.kill()
     _log("all child processes stopped")
 
+
 def restart_if_dead():
     for name, p in list(PROCS.items()):
         if p and p.poll() is not None:
             exit_type = _classify_exit(name, p.returncode)
             if exit_type == "expected_shutdown":
-                _log(f"{name} exited with code {p.returncode} (expected during shutdown)")
+                _log(
+                    f"{name} exited with code {p.returncode} (expected during shutdown)"
+                )
                 continue
 
             if exit_type == "possible_manual_interrupt":
-                _log(f"{name} exited with code {p.returncode} (manual interrupt or controlled stop)")
+                _log(
+                    f"{name} exited with code {p.returncode} (manual interrupt or controlled stop)"
+                )
                 if not RUNNING:
                     continue
 
@@ -119,9 +128,11 @@ def restart_if_dead():
             elif name == "watcher":
                 PROCS[name] = _spawn("watcher", ["watch.py", "--folder", WATCH_FOLDER])
 
+
 def _handle_signal(sig, frame):
     global RUNNING
     RUNNING = False
+
 
 def main():
     _preflight_checks()
@@ -148,6 +159,7 @@ def main():
         _log("shutting down")
         stop_children()
         _log("stopped")
+
 
 if __name__ == "__main__":
     main()

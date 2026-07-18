@@ -77,11 +77,15 @@ class TestRetryJob:
     def test_retry_failed_job(self, temp_db, temp_file):
         jid, _ = temp_db.enqueue_job(temp_file)
         # Mark as failed
-        temp_db.update_job_status(jid, "failed", stage="failed", error_message="test error")
+        temp_db.update_job_status(
+            jid, "failed", stage="failed", error_message="test error"
+        )
         result = temp_db.retry_job(jid)
         assert result is True
         with sqlite3.connect(temp_db.DATABASE_PATH) as conn:
-            row = conn.execute("SELECT status, stage FROM indexing_jobs WHERE id=?", (jid,)).fetchone()
+            row = conn.execute(
+                "SELECT status, stage FROM indexing_jobs WHERE id=?", (jid,)
+            ).fetchone()
         assert row[0] == "queued"
         assert row[1] == "pending"
 
@@ -108,7 +112,9 @@ class TestCancelJob:
         result = temp_db.cancel_job(jid)
         assert result is True
         with sqlite3.connect(temp_db.DATABASE_PATH) as conn:
-            row = conn.execute("SELECT status FROM indexing_jobs WHERE id=?", (jid,)).fetchone()
+            row = conn.execute(
+                "SELECT status FROM indexing_jobs WHERE id=?", (jid,)
+            ).fetchone()
         assert row[0] == "cancelled"
 
     def test_cancel_running_job(self, temp_db, temp_file):
@@ -145,7 +151,9 @@ class TestGetJob:
 class TestGetMediaDetail:
     def test_get_existing_media(self, temp_db, temp_file):
         media_id = temp_db.save_to_db(
-            temp_file, "sample.mp4", 60.0,
+            temp_file,
+            "sample.mp4",
+            60.0,
             [{"start": 0, "end": 5, "text": "hello"}],
         )
         detail = temp_db.get_media_detail(media_id)
@@ -161,7 +169,9 @@ class TestGetMediaDetail:
 class TestGetMediaSegments:
     def test_returns_segments(self, temp_db, temp_file):
         media_id = temp_db.save_to_db(
-            temp_file, "sample.mp4", 60.0,
+            temp_file,
+            "sample.mp4",
+            60.0,
             [
                 {"start": 0, "end": 5, "text": "first segment"},
                 {"start": 5, "end": 10, "text": "second segment"},
@@ -173,7 +183,7 @@ class TestGetMediaSegments:
         assert segments[1]["text"] == "second segment"
 
     def test_limit_applied(self, temp_db, temp_file):
-        transcript = [{"start": i, "end": i+1, "text": f"seg{i}"} for i in range(10)]
+        transcript = [{"start": i, "end": i + 1, "text": f"seg{i}"} for i in range(10)]
         media_id = temp_db.save_to_db(temp_file, "sample.mp4", 60.0, transcript)
         segments = temp_db.get_media_segments(media_id, limit=5)
         assert len(segments) == 5
@@ -191,7 +201,9 @@ class TestGetDbStats:
         f1.write_bytes(b"a")
         f2 = tmp_path / "b.mp4"
         f2.write_bytes(b"b")
-        temp_db.save_to_db(str(f1), "a.mp4", 10.0, [{"start": 0, "end": 1, "text": "a"}])
+        temp_db.save_to_db(
+            str(f1), "a.mp4", 10.0, [{"start": 0, "end": 1, "text": "a"}]
+        )
         temp_db.enqueue_job(str(f2))
         temp_db.enqueue_job(str(f1))  # re-enqueue (hash unchanged, returns -1)
         stats = temp_db.get_db_stats()
@@ -224,7 +236,9 @@ class TestCreateBackup:
 
     def test_backup_copies_db(self, temp_db, temp_file):
         temp_db.save_to_db(
-            temp_file, "sample.mp4", 60.0,
+            temp_file,
+            "sample.mp4",
+            60.0,
             [{"start": 0, "end": 5, "text": "hello"}],
         )
         result = temp_db.create_backup(label="test")
