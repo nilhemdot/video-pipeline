@@ -38,7 +38,7 @@ def process_file(file_path):
     if media_id:
         save_to_vector_db(media_id, file_name, file_path, segments, summary=summary_text)
         save_summary_vector(media_id, file_name, summary_text)
-    
+
     return media_id
 
 

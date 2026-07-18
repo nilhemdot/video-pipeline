@@ -82,7 +82,7 @@ class TestSummaryGenerator:
         mock_tokenizer.decode.return_value = "chunk summary"
 
         segments = [{"text": "long content"}]
-        result = summarizer.summary_generator(segments)
+        summarizer.summary_generator(segments)
         # model.generate should be called twice (2 chunks)
         assert mock_model.generate.call_count >= 2
 

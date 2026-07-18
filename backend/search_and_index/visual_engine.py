@@ -1,9 +1,8 @@
 import cv2
 from PIL import Image
 import os
-from sentence_transformers import SentenceTransformer, util
+from sentence_transformers import SentenceTransformer
 import lancedb
-import json
 import torch
 
 if __package__:
@@ -16,7 +15,7 @@ else:
 INTERVAL_SECONDS = 2  # extract one frame every  seconds
 BATCH_SIZE = 50 #50 frames cap for storing before saving in the DB
 MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
-import sys
+import sys  # noqa: E402
 if getattr(sys, 'frozen', False):
     import os
     PROJECT_ROOT = os.path.expanduser("~/.tobu")
@@ -91,7 +90,7 @@ def index_video_visually(video_path, media_id, db_path=VECTOR_DB_PATH):
         ret,frame = cap.read()
 
         if not ret:
-            
+
             break
 
         if count % interval == 0:
@@ -103,13 +102,13 @@ def index_video_visually(video_path, media_id, db_path=VECTOR_DB_PATH):
 
             timestamp = round(count/fps,2)
             thumb_filename = f"{media_id}_{timestamp}.jpg"
-            
+
             full_thumb_path = os.path.join(THUMBNAIL_PATH, thumb_filename)
             pil_img.thumbnail(THUMBNAIL_MAX_SIZE)
             pil_img.save(full_thumb_path,"jpeg",quality=THUMBNAIL_QUALITY )
 
-            
-            
+
+
             img_embedding = get_visual_model().encode(pil_img).tolist()
 
 
@@ -156,7 +155,7 @@ def search_visual_moments(query,image_path = False, db_path=VECTOR_DB_PATH, limi
         table = db.open_table(table_name)
     except Exception:
         return []
-    
+
     if image_path:
         img = cv2.imread(query)
         colour_converted = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
@@ -171,18 +170,18 @@ def search_visual_moments(query,image_path = False, db_path=VECTOR_DB_PATH, limi
 
     for res in results:
         if "vector" in res:
-            del res["vector"] 
-        
+            del res["vector"]
+
         res["media_id"] = str(res["media_id"])
 
-    
+
     return results
 
-            
-            
-
-            
 
 
 
-    
+
+
+
+
+

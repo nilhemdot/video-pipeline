@@ -6,8 +6,6 @@ real data is touched.  No AI models required.
 
 import os
 import sqlite3
-import tempfile
-import hashlib
 
 import pytest
 

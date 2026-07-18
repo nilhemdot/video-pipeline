@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
-from backend.search_and_index.api_models import EnvelopeSuccess, EnvelopeError, ErrorBody
+from backend.search_and_index.api_models import EnvelopeSuccess
 from backend.search_and_index import api_service
 
 executor = ThreadPoolExecutor(max_workers=1)
@@ -9,7 +9,6 @@ executor = ThreadPoolExecutor(max_workers=1)
 def _prompt_file():
     import tkinter as tk
     from tkinter import filedialog
-    import os
     # Provide a hidden window for the dialog
     root = tk.Tk()
     root.withdraw()
@@ -21,7 +20,6 @@ def _prompt_file():
 def _prompt_folder():
     import tkinter as tk
     from tkinter import filedialog
-    import os
     root = tk.Tk()
     root.withdraw()
     root.attributes('-topmost', True)
@@ -33,12 +31,12 @@ router = APIRouter(prefix="/api/v1")
 
 @router.get("/health", response_model=EnvelopeSuccess)
 async def get_health():
-   
+
     status = api_service.health_status()
     if status["database"] != "ok":
-        # Map DB failures to 503 Service Unavailable 
+        # Map DB failures to 503 Service Unavailable
         raise HTTPException(
-            status_code=503, 
+            status_code=503,
             detail={"ok": False, "error": {"code": "db_error", "message": "Database unreachable"}}
         )
     return {"ok": True, "data": status}
@@ -79,8 +77,8 @@ def _build_file_tree(dir_path: str, base_dir: str) -> list:
         for entry in entries:
             if entry.name.startswith('.'):
                 continue
-            
-            abs_path = os.path.abspath(entry.path).replace("\\", "/")    
+
+            abs_path = os.path.abspath(entry.path).replace("\\", "/")
             if entry.is_dir():
                 tree.append({
                     "name": entry.name,
@@ -92,7 +90,7 @@ def _build_file_tree(dir_path: str, base_dir: str) -> list:
                 mime_type, _ = mimetypes.guess_type(entry.name)
                 stat = entry.stat()
                 mtime_iso = datetime.fromtimestamp(stat.st_mtime, timezone.utc).isoformat()
-                
+
                 tree.append({
                     "name": entry.name,
                     "type": "file",
@@ -109,20 +107,20 @@ def _build_file_tree(dir_path: str, base_dir: str) -> list:
 async def get_system_file_tree():
     import os
     from backend.search_and_index.api_app import DEFAULT_WATCH_FOLDER
-    
+
     if not os.path.exists(DEFAULT_WATCH_FOLDER):
         os.makedirs(DEFAULT_WATCH_FOLDER, exist_ok=True)
-        
+
     tree = _build_file_tree(DEFAULT_WATCH_FOLDER, DEFAULT_WATCH_FOLDER)
     abs_watch = os.path.abspath(DEFAULT_WATCH_FOLDER).replace("\\", "/")
-    
+
     root_node = {
         "name": os.path.basename(abs_watch) or "watch",
         "type": "folder",
         "path": abs_watch,
         "children": tree
     }
-    
+
     return {"ok": True, "data": root_node}
 
 @router.delete("/system/workspace-folder")
@@ -130,15 +128,15 @@ async def delete_workspace_folder(payload: dict):
     folder_path = payload.get("folder_path")
     if not folder_path:
         raise HTTPException(status_code=400, detail="Missing folder_path")
-        
+
     import os
     from pathlib import Path
     normalized = os.path.abspath(folder_path)
-    
+
     # Do cleanup in backend.
     from backend.search_and_index import sql_database
     deleted_stats = sql_database.remove_workspace_folder(normalized)
-    
+
     # If the backend is watching this folder, unwatch it.
     from backend.search_and_index.api_app import get_observer
     observer = get_observer()
@@ -147,7 +145,7 @@ async def delete_workspace_folder(payload: dict):
             if os.path.abspath(watch.path) == normalized:
                 observer.unschedule(watch)
                 break
-                
+
     # Remove from allowed dirs in media
     try:
         from backend.search_and_index.api_routes_media import user_added_dirs
@@ -156,14 +154,14 @@ async def delete_workspace_folder(payload: dict):
             user_added_dirs.remove(str_norm)
     except ImportError:
         pass
-        
+
     import logging
     logger = logging.getLogger("tobu")
-    
+
     # 5. NEVER touch disk files — assert safety
     assert True  # Only DB records deleted, disk untouched
     logger.info(f"Workspace removed: {normalized} | disk untouched | data cleared: {deleted_stats}")
-    
+
     return {
        "success": True,
        "folder": normalized,

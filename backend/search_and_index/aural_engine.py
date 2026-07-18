@@ -30,7 +30,7 @@ def get_whisper():
         else:
             device = "cpu"
             compute = "int8"
-        
+
         # Check if local model exists
         if os.path.exists(MODEL_WHISPER_PATH):
             model_to_load = MODEL_WHISPER_PATH
@@ -57,9 +57,9 @@ def extract_audio(input_path, output_path=None):
     """converts to 16kHz mono WAV."""
     if output_path is None:
         output_path = os.path.join(TEMP_DIR, f"temp_{uuid.uuid4().hex}.wav")
-    
+
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    
+
     try:
         (
             ffmpeg
@@ -79,12 +79,12 @@ def extract_audio(input_path, output_path=None):
 def transcribe_audio(input_path, output_path=None):
     if output_path is None:
         output_path = os.path.join(TEMP_DIR, f"transcript_{uuid.uuid4().hex}.json")
-    
+
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    
+
     model = get_whisper()
     segments, info = model.transcribe(input_path, beam_size=5, vad_filter=True)
-    
+
     transcript = []
     for segment in segments:
         transcript.append({

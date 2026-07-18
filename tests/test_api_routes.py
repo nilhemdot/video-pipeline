@@ -5,7 +5,7 @@ Tests verify HTTP status codes, response envelope structure, and routing.
 """
 
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock
 from fastapi.testclient import TestClient
 
 
@@ -31,7 +31,6 @@ def client(monkeypatch, tmp_path):
     monkeypatch.setattr(watch, "FileHandler", MagicMock)
 
     # Patch watchdog Observer in the api_app module's import scope
-    import backend.search_and_index.api_app as api_app_mod
     mock_observer = MagicMock()
     mock_observer_class = MagicMock(return_value=mock_observer)
     # The api_app imports Observer inside lifespan, so patch at module level

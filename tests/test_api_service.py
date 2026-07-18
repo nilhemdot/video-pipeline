@@ -4,7 +4,7 @@ All sql_database functions are monkeypatched. No real DB needed.
 """
 
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock
 
 from backend.search_and_index import api_service
 

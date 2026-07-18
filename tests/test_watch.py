@@ -4,10 +4,7 @@ watchdog is mocked via conftest. enqueue_job + initialize_db are monkeypatched.
 """
 
 import os
-import time
-import threading
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock
 
 from backend.search_and_index import watch
 

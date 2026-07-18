@@ -4,9 +4,8 @@ cv2, PIL, torch, sentence_transformers, and lancedb are mocked via conftest.
 No GPU or model download required.
 """
 
-import os
 import pytest
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import patch, MagicMock
 
 from backend.search_and_index import visual_engine
 
@@ -91,7 +90,7 @@ class TestIndexVideoVisually:
             mock_cap.get.return_value = 0.0  # FPS = 0
             mock_cv2.VideoCapture.return_value = mock_cap
 
-            result = visual_engine.index_video_visually(video_path, media_id=1)
+            visual_engine.index_video_visually(video_path, media_id=1)
 
         mock_clear.assert_called_once()
         mock_cap.release.assert_called_once()
@@ -144,7 +143,7 @@ class TestIndexVideoVisually:
         mock_get_model.return_value = mock_model
 
         with patch("backend.search_and_index.visual_engine.cv2") as mock_cv2, \
-             patch("backend.search_and_index.visual_engine.Image") as mock_pil:
+             patch("backend.search_and_index.visual_engine.Image"):
             mock_cap = MagicMock()
             mock_cap.get.side_effect = [30.0]
             mock_cap.read.return_value = (False, None)

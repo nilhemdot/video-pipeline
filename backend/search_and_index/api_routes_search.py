@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Query
-from typing import List
-from backend.search_and_index.api_models import EnvelopeSuccess, HybridSearchRequest, HybridResultItem
+from backend.search_and_index.api_models import EnvelopeSuccess, HybridSearchRequest
 from backend.search_and_index import api_service
 
 router = APIRouter(prefix="/api/v1/search", tags=["Search"])
@@ -10,7 +9,7 @@ async def search_hybrid(payload: HybridSearchRequest):
     """hybrid search """
     results = api_service.search_hybrid(payload)
     return {
-        "ok": True, 
+        "ok": True,
         "data": {
             "query": payload.query,
             "count": len(results),

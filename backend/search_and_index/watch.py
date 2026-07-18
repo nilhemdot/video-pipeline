@@ -37,12 +37,12 @@ class FileHandler(FileSystemEventHandler):
     def on_deleted(self, event):
         if event.is_directory:
             return
-        
+
         path = event.src_path
         if path in self._timers:
             self._timers[path].cancel()
             del self._timers[path]
-            
+
         ext = os.path.splitext(path)[1].lower()
         if ext in SUPPORTED_EXTENSIONS:
             try:
@@ -103,15 +103,15 @@ class FileHandler(FileSystemEventHandler):
 
         if path in self._timers:
             self._timers[path].cancel()
-            
+
         timer = threading.Timer(self._debounce_seconds, self._process_after_debounce, args=(path,))
         self._timers[path] = timer
         timer.start()
-        
+
     def _process_after_debounce(self, path):
         if path in self._timers:
             del self._timers[path]
-            
+
         if not os.path.exists(path):
             return
 
@@ -160,7 +160,7 @@ def start_watcher(folder):
         name="tobu-worker",
     )
     worker_thread.start()
-    print(f"[TOBU] Worker thread started — jobs will be processed automatically")
+    print("[TOBU] Worker thread started — jobs will be processed automatically")
 
     print(f"Initial scan on: {folder}")
     initial_scan(folder)
@@ -185,4 +185,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
     start_watcher(args.folder)
 
-    

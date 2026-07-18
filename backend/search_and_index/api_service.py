@@ -22,7 +22,7 @@ def _get_raw_semantic_search():
         from semantic_engine import semantic_search as _raw_semantic_search
     return _raw_semantic_search
 
-#converts to api standard 
+#converts to api standard
 def normalize_result_item(item: Dict[Any, Any]) -> Dict[str, Any]:
     return {
         "file_name": item.get("file_name"),
@@ -92,16 +92,18 @@ def ingest_folder(folder_path: str, recursive: bool = True) -> Dict[str, int]:
     supported_exts = {".mp4", ".mkv", ".avi", ".mov", ".webm", ".pdf", ".md", ".txt"}
     queued_count = 0
     skipped_count = 0
-    
+
     for root, _, files in os.walk(folder_path):
         if not recursive and root != folder_path:
             continue
         for file in files:
             if os.path.splitext(file)[1].lower() in supported_exts:
                 _, created = sql_database.enqueue_job(os.path.join(root, file))
-                if created: queued_count += 1
-                else: skipped_count += 1
-    
+                if created:
+                    queued_count += 1
+                else:
+                    skipped_count += 1
+
     return {"queued": queued_count, "skipped_duplicates": skipped_count}
 
 def reindex_file(file_path: str) -> Dict[str, Any]:

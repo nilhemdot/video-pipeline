@@ -5,7 +5,6 @@ canned results so RRF fusion logic is tested in isolation.
 """
 
 import os
-from datetime import datetime
 
 import pytest
 

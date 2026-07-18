@@ -11,7 +11,8 @@
 [![Electron](https://img.shields.io/badge/Electron-30-47848F?style=flat-square&logo=electron)](https://electronjs.org)
 [![React](https://img.shields.io/badge/React-Vite-61DAFB?style=flat-square&logo=react)](https://vitejs.dev)
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
-[![Coverage](https://img.shields.io/badge/coverage-60%25-yellow?style=flat-square)](https://github.com/VishnupiriyanV/TOBU/actions)
+[![CI](https://github.com/nilhemdot/video-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/nilhemdot/video-pipeline/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/badge/coverage-60%25-yellow?style=flat-square)](https://github.com/nilhemdot/video-pipeline/actions)
 
 </div>
 

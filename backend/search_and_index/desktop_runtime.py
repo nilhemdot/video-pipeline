@@ -54,16 +54,16 @@ def health_check():
 
 def _spawn(name, args):
     return subprocess.Popen(
-        [sys.executable, "-u", *args],  
+        [sys.executable, "-u", *args],
         cwd=str(BASE_DIR),
-        stdout=None,   
-        stderr=None,   
+        stdout=None,
+        stderr=None,
         text=True,
     )
 
 
 def _is_expected_exit(returncode):
-    # 
+    #
     # 0 - clean exit
     # 1 -  scripts exit 1 on KeyboardInterrupt
     # 130 = SIGINT-style exit code on Unix-like conventions

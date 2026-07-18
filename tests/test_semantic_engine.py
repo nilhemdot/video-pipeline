@@ -3,7 +3,6 @@
 SentenceTransformer + LanceDB are mocked (no model download / GPU needed).
 """
 
-import os
 import pytest
 from unittest.mock import patch, MagicMock
 

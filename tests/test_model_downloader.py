@@ -4,7 +4,6 @@ sentence_transformers + transformers + faster_whisper are mocked via conftest.
 """
 
 import os
-import pytest
 from unittest.mock import patch, MagicMock
 
 from backend.search_and_index import model_downloader as md

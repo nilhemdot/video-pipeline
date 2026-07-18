@@ -1,8 +1,6 @@
 
 from sentence_transformers import SentenceTransformer
 import lancedb
-import json
-import pandas as pd
 import os
 
 if __package__:
@@ -11,7 +9,7 @@ else:
     from model_downloader import MODEL_SEMANTIC_PATH
 
 MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
-import sys
+import sys  # noqa: E402
 if getattr(sys, 'frozen', False):
     import os
     PROJECT_ROOT = os.path.expanduser("~/.tobu")
@@ -43,35 +41,35 @@ def _delete_rows_by_media_id(table, media_id):
 def embed(sentences):
     embeddings = get_model().encode(sentences)
     return embeddings.tolist()
-    
+
 
 
 def sentence_window(data,window_size=3):
     final_list=[]
     chunks = [seg["text"] for seg in data]
     n=len(chunks)
-    
-    
+
+
     for text in range(0,n):
         starting_index=max(0,text-(window_size//2))
-        ending_index=min(n,text+(window_size//2)+1) 
+        ending_index=min(n,text+(window_size//2)+1)
         window_list=chunks[starting_index:ending_index]
         final_list.append(window_list)
 
     return final_list
 def save_to_vector_db(media_id, file_name, file_path, transcript_data, summary=None, db_path=VECTOR_DB_PATH):
 
-    
-    
+
+
     windowed_text_lists = sentence_window(transcript_data)
 
     texts_to_embed = [" ".join(window) for window in windowed_text_lists]
 
     #generate the embedding
-    
+
     embeddings = embed(texts_to_embed)
 
-    
+
 
     #map data
 
@@ -96,7 +94,7 @@ def save_to_vector_db(media_id, file_name, file_path, transcript_data, summary=N
     if not data:
         print(f" No valid segments:{file_name}")
         return
-    
+
     # storing the data in lancedb
 
     db = lancedb.connect(db_path)
@@ -126,14 +124,14 @@ def semantic_search(query, limit, db_path=VECTOR_DB_PATH):
             "file_name": r["file_name"],
             "file_path": r["file_path"],
             "start": r["start"],
-            "end": r.get("end", r["start"]), 
+            "end": r.get("end", r["start"]),
             "text": r["text"],
-            "score": r["_distance"] 
+            "score": r["_distance"]
         })
-        
+
     return formatted_results
 
-    
+
 def save_summary_vector(media_id,file_name,summary,db_path = VECTOR_DB_PATH):
     db = lancedb.connect(db_path)
     table_name = "summary_segments"
@@ -159,7 +157,7 @@ def file_search(query,limit=5,db_path=VECTOR_DB_PATH):
     if "summary_segments" not in db.table_names():
         return []
     table = db.open_table("summary_segments")
-    
+
     query_vector = embed([query])[0]
 
     results = table.search(query_vector).limit(limit).to_pandas()
@@ -169,7 +167,7 @@ def file_search(query,limit=5,db_path=VECTOR_DB_PATH):
         r.pop("vector", None)
     return records
 
-    
+
 
 
 

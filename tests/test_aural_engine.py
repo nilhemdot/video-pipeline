@@ -5,7 +5,6 @@ Whisper model is mocked (no GPU / model download needed).
 
 import os
 import json
-import pytest
 from unittest.mock import patch, MagicMock
 
 from backend.search_and_index import aural_engine

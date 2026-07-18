@@ -4,9 +4,7 @@ PyMuPDF (fitz) and frontmatter are mocked via conftest.
 semantic_engine + sql_database functions are monkeypatched.
 """
 
-import os
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock
 
 from backend.search_and_index import document_engine
 

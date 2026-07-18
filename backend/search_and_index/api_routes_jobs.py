@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Query
-from typing import List, Optional
+from typing import Optional
 from backend.search_and_index.api_models import EnvelopeSuccess, JobItem
 from backend.search_and_index import api_service
 
@@ -10,7 +10,7 @@ async def list_jobs(
     status: Optional[str] = Query(None, pattern="^(queued|running|failed|done|cancelled)$"),
     limit: int = Query(100, ge=1, le=500)
 ):
-    
+
     jobs = api_service.get_jobs(status=status, limit=limit)
     return {"ok": True, "data": {"count": len(jobs), "items": jobs}}
 

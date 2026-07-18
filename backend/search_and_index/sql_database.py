@@ -1,14 +1,13 @@
 import sqlite3
 import os
 import hashlib
-import time
 import shutil
 from datetime import datetime
 import lancedb
 
 
 MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
-import sys
+import sys  # noqa: E402
 if getattr(sys, 'frozen', False):
     # When packaged via PyInstaller, route all data to ~/.tobu
     PROJECT_ROOT = os.path.expanduser("~/.tobu")
@@ -92,10 +91,10 @@ def initialize_db():
             cursor.execute(jobs_create_table)
             cursor.execute(jobs_status_index)
             cursor.execute(settings_create_table)
-            
+
             # Initial onboarding status
             cursor.execute("INSERT OR IGNORE INTO app_settings (key, value) VALUES ('onboarding_completed', 'false')")
-            
+
             connection.commit()
         except Exception as e:
             print(f"Database init error: {e}")
@@ -117,7 +116,7 @@ def save_to_db(file_path, file_name, duration, transcript_data,source_type="vide
     connection = sqlite3.connect(DATABASE_PATH)
     cursor = connection.cursor()
 
-    
+
 
     try:
         cursor.execute("SELECT id FROM media_files WHERE file_path = ?", (file_path,))
@@ -180,40 +179,40 @@ def save_to_db(file_path, file_name, duration, transcript_data,source_type="vide
 
 def search_to_json(query):
     with sqlite3.connect(DATABASE_PATH) as connection:
-        
-        connection.row_factory = sqlite3.Row 
+
+        connection.row_factory = sqlite3.Row
         cursor = connection.cursor()
-        
+
         search_query = """
-            SELECT 
-                f.file_name, 
-                f.file_path, 
-                t.location_start, 
-                t.location_end, 
+            SELECT
+                f.file_name,
+                f.file_path,
+                t.location_start,
+                t.location_end,
                 t.content as text,
                 t.rank as score
             FROM transcripts_fts t
             JOIN media_files f ON t.media_id = f.id
-            WHERE t.content MATCH ? 
-            ORDER BY rank 
+            WHERE t.content MATCH ?
+            ORDER BY rank
             LIMIT 50
         """
-        
+
         query1 = f'"{query}"'
         cursor.execute(search_query, (query1,))
         rows = cursor.fetchall()
-        
+
         results = []
         for row in rows:
             results.append({
                 "file_name": row["file_name"],
-                "file_path": os.path.abspath(row["file_path"]), 
+                "file_path": os.path.abspath(row["file_path"]),
                 "start": row["location_start"],
                 "end": row["location_end"],
                 "text": row["text"],
                 "score": row["score"]
                 })
-        
+
 
         return results
 
@@ -231,7 +230,7 @@ def compute_file_hash(path,chunk_size=1024 * 1024):
 def should_process(file_path):
     if not os.path.exists(file_path):
         return False, None
-        
+
     current_hash = compute_file_hash(file_path)
     with sqlite3.connect(DATABASE_PATH) as connection:
         row = connection.execute(
@@ -252,7 +251,7 @@ def delete_file_records(file_path):
             return
         media_id = row[0]
 
-        
+
         try:
             db = lancedb.connect(VECTOR_DB_PATH)
             for table_name in ("semantic_segments", "summary_segments", "visual_moments"):
@@ -262,7 +261,7 @@ def delete_file_records(file_path):
         except Exception as e:
             print(f"Vector cleanup error for {file_path}: {e}")
 
-        
+
         if os.path.isdir(THUMBNAIL_PATH):
             prefix = f"{media_id}_"
             for name in os.listdir(THUMBNAIL_PATH):
@@ -282,24 +281,24 @@ def remove_workspace_folder(folder_path):
     """Safely remove app data for all files prefixed with the folder path."""
     normalized = os.path.abspath(folder_path)
     prefix = normalized + os.sep
-    
+
     with sqlite3.connect(DATABASE_PATH) as connection:
         cursor = connection.cursor()
         cursor.execute("SELECT id, file_path FROM media_files WHERE file_path = ? OR file_path LIKE ?", (normalized, prefix + '%'))
         rows = cursor.fetchall()
-        
+
         if not rows:
             return {"embeddings": 0, "transcripts": 0, "index_entries": 0}
-            
+
         media_ids = [r[0] for r in rows]
         media_ids_str = ",".join(map(str, media_ids))
-        
+
         cursor.execute(f"SELECT COUNT(*) FROM transcripts_fts WHERE media_id IN ({media_ids_str})")
         transcripts_count = cursor.fetchone()[0]
-        
+
         index_entries_count = len(media_ids)
         embeddings_count = 0
-        
+
         try:
             db = lancedb.connect(VECTOR_DB_PATH)
             for table_name in ("semantic_segments", "summary_segments", "visual_moments"):
@@ -315,7 +314,7 @@ def remove_workspace_folder(folder_path):
                     table.delete(f"media_id IN ({media_ids_str})")
         except Exception as e:
             print(f"Vector cleanup error for {folder_path}: {e}")
-            
+
         if os.path.isdir(THUMBNAIL_PATH):
             for m_id in media_ids:
                 prefix_thumb = f"{m_id}_"
@@ -325,13 +324,13 @@ def remove_workspace_folder(folder_path):
                             os.remove(os.path.join(THUMBNAIL_PATH, name))
                         except Exception:
                             pass
-                            
+
         cursor.execute(f"DELETE FROM transcripts_fts WHERE media_id IN ({media_ids_str})")
         cursor.execute(f"DELETE FROM media_files WHERE id IN ({media_ids_str})")
-        
+
         cursor.execute("UPDATE indexing_jobs SET status = 'cancelled' WHERE file_path = ? OR file_path LIKE ?", (normalized, prefix + '%'))
         connection.commit()
-        
+
         return {
             "embeddings": embeddings_count,
             "transcripts": transcripts_count,
@@ -354,7 +353,7 @@ def enqueue_job(file_path, source_type=None, max_retries=3):
     with sqlite3.connect(DATABASE_PATH) as connection:
         cursor = connection.cursor()
 
-        
+
         cursor.execute(
             """
             SELECT id FROM indexing_jobs
@@ -393,7 +392,7 @@ def enqueue_job(file_path, source_type=None, max_retries=3):
                 )
                 row = cursor.fetchone()
                 if row and row[0] == current_hash:
-                    # File is already indexed and unchanged. 
+                    # File is already indexed and unchanged.
                     return -1, False
             except Exception:
                 pass # Fallback to enqueuing if hash calculation fails
@@ -413,7 +412,7 @@ def fetch_next_job():
         connection.row_factory = sqlite3.Row
         cursor = connection.cursor()
 
-       
+
         cursor.execute("BEGIN IMMEDIATE")
 
         cursor.execute(
@@ -448,7 +447,7 @@ def fetch_next_job():
 
         connection.commit()
         return dict(row)
-    
+
 def update_job_status(job_id, status, stage=None, progress=None, error_message=None):
     fields = ["status = ?", "updated_at = CURRENT_TIMESTAMP"]
     params = [status]

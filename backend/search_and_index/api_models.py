@@ -1,11 +1,6 @@
-from pydantic import BaseModel, Field, constr
+from pydantic import BaseModel, Field
 from typing import List, Optional, Generic, TypeVar, Literal, Union
 
-
-try:
-    from typing import Annotated
-except ImportError:
-    from typing_extensions import Annotated
 
 T = TypeVar('T')
 
