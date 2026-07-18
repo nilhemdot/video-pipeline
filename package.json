@@ -10,10 +10,10 @@
     "build:electron": "electron-builder"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1",
+    "concurrently": "^9.2.4",
     "cross-env": "^7.0.3",
-    "electron": "^30.0.0",
-    "electron-builder": "^24.13.3",
+    "electron": "^39.8.5",
+    "electron-builder": "^26.15.3",
     "wait-on": "^9.0.4"
   },
   "build": {
