@@ -7,11 +7,47 @@ on:
     branches: [main, dev]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
+  ruff-auto-fix:
+    name: Ruff auto-fix + format
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install ruff==0.5.0
+      - name: Run ruff check --fix
+        run: ruff check backend/ tests/ --select=E,F,W --ignore=E501 --fix --unsafe-fixes
+      - name: Run ruff format
+        run: ruff format backend/ tests/
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "No changes needed."
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Ruff applied fixes."
+          fi
+      - name: Commit fixes
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "style: ruff auto-fix + format [skip ci]"
+          git push
+
   lint:
-    name: Lint (ruff)
+    name: Lint check (ruff)
+    needs: ruff-auto-fix
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:

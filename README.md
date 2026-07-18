@@ -13,6 +13,12 @@
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 [![CI](https://github.com/nilhemdot/video-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/nilhemdot/video-pipeline/actions/workflows/ci.yml)
 [![Coverage](https://img.shields.io/badge/coverage-60%25-yellow?style=flat-square)](https://github.com/nilhemdot/video-pipeline/actions)
+[![Code Style](https://img.shields.io/badge/code%20style-ruff-261230?style=flat-square)](https://github.com/astral-sh/ruff)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey?style=flat-square)](https://github.com/nilhemdot/video-pipeline)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](https://github.com/nilhemdot/video-pipeline/pulls)
+[![Last Commit](https://img.shields.io/github/last-commit/nilhemdot/video-pipeline?style=flat-square)](https://github.com/nilhemdot/video-pipeline/commits)
+[![Issues](https://img.shields.io/github/issues/nilhemdot/video-pipeline?style=flat-square)](https://github.com/nilhemdot/video-pipeline/issues)
+[![Downloads](https://img.shields.io/github/downloads/nilhemdot/video-pipeline/total?style=flat-square)](https://github.com/nilhemdot/video-pipeline/releases)
 
 </div>
 
