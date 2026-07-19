@@ -54,12 +54,14 @@ def process_file(file_path):
 def process_pdf(file_path):
     document = fitz.open(file_path)
     segments = []
-    for page_num in range(len(document)):
-        page = document.load_page(page_num)
-        text = page.get_text("text").strip()
-        if text:
-            segments.append({"text": text, "page": page_num + 1})
-    document.close()
+    try:
+        for page_num in range(len(document)):
+            page = document.load_page(page_num)
+            text = page.get_text("text").strip()
+            if text:
+                segments.append({"text": text, "page": page_num + 1})
+    finally:
+        document.close()
 
     file_name = os.path.basename(file_path)
     summary_text = summary_generator(segments)

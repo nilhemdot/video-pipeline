@@ -216,7 +216,8 @@ def search_to_json(query):
             LIMIT 50
         """
 
-        query1 = f'"{query}"'
+        # Escape embedded double-quotes by doubling them (FTS5 phrase syntax)
+        query1 = '"' + query.replace('"', '""') + '"'
         cursor.execute(search_query, (query1,))
         rows = cursor.fetchall()
 

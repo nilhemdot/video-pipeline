@@ -155,6 +155,8 @@ def search_visual_moments(query, image_path=False, db_path=VECTOR_DB_PATH, limit
 
     if image_path:
         img = cv2.imread(query)
+        if img is None:
+            raise ValueError(f"Could not read image file: {query}")
         colour_converted = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         pil_img = Image.fromarray(colour_converted)
         query_vector = get_visual_model().encode(pil_img).tolist()
