@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 import asyncio
+import sqlite3
 from concurrent.futures import ThreadPoolExecutor
 from backend.search_and_index.api_models import EnvelopeSuccess
 from backend.search_and_index import api_service
@@ -205,9 +206,7 @@ async def cancel_indexing(payload: dict):
 
     normalized = os.path.abspath(folder_path)
     prefix = normalized + os.sep
-    with getattr(sql_database, "sqlite3").connect(
-        sql_database.DATABASE_PATH
-    ) as connection:
+    with sqlite3.connect(sql_database.DATABASE_PATH) as connection:
         cursor = connection.cursor()
         cursor.execute(
             "UPDATE indexing_jobs SET status = 'cancelled' WHERE file_path = ? OR file_path LIKE ?",

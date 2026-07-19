@@ -14,6 +14,8 @@ jobs:
     name: Ruff auto-fix + format
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    outputs:
+      changed: ${{ steps.changes.outputs.changed }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -37,7 +39,7 @@ jobs:
             echo "Ruff applied fixes."
           fi
       - name: Commit fixes
-        if: steps.changes.outputs.changed == 'true'
+        if: steps.changes.outputs.changed == 'true' && github.event_name == 'push'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -48,6 +50,11 @@ jobs:
   lint:
     name: Lint check (ruff)
     needs: ruff-auto-fix
+    # On push events, skip lint when auto-fix pushed a corrective commit — the
+    # new CI run triggered by that push will validate the fixed code.
+    # On pull_request events, always run: auto-fix cannot push, so lint must
+    # surface any remaining issues to block the PR.
+    if: github.event_name == 'pull_request' || needs.ruff-auto-fix.outputs.changed == 'false'
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:

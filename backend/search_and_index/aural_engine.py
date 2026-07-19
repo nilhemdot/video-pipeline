@@ -82,10 +82,7 @@ def extract_audio(input_path, output_path=None):
 
 
 def transcribe_audio(input_path, output_path=None):
-    if output_path is None:
-        output_path = os.path.join(TEMP_DIR, f"transcript_{uuid.uuid4().hex}.json")
-
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    os.makedirs(TEMP_DIR, exist_ok=True)
 
     model = get_whisper()
     segments, info = model.transcribe(input_path, beam_size=5, vad_filter=True)
@@ -100,10 +97,12 @@ def transcribe_audio(input_path, output_path=None):
             }
         )
 
-    with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(transcript, f, indent=2, ensure_ascii=False)
+    if output_path is not None:
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        with open(output_path, "w", encoding="utf-8") as f:
+            json.dump(transcript, f, indent=2, ensure_ascii=False)
+        print(f"Transcript saved to {output_path}")
 
-    print(f"Transcript saved to {output_path}")
     return transcript
 
 

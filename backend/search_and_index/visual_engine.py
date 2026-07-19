@@ -85,7 +85,7 @@ def index_video_visually(video_path, media_id, db_path=VECTOR_DB_PATH):
     count = 0
     batch_size = BATCH_SIZE
 
-    db = lancedb.connect(VECTOR_DB_PATH)
+    db = lancedb.connect(db_path)
     table_name = "visual_moments"
 
     if table_name in db.table_names():
@@ -155,6 +155,8 @@ def search_visual_moments(query, image_path=False, db_path=VECTOR_DB_PATH, limit
 
     if image_path:
         img = cv2.imread(query)
+        if img is None:
+            raise ValueError(f"Could not read image file: {query}")
         colour_converted = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         pil_img = Image.fromarray(colour_converted)
         query_vector = get_visual_model().encode(pil_img).tolist()
