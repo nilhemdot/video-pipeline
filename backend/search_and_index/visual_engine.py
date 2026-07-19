@@ -85,7 +85,7 @@ def index_video_visually(video_path, media_id, db_path=VECTOR_DB_PATH):
     count = 0
     batch_size = BATCH_SIZE
 
-    db = lancedb.connect(VECTOR_DB_PATH)
+    db = lancedb.connect(db_path)
     table_name = "visual_moments"
 
     if table_name in db.table_names():

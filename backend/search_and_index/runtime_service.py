@@ -162,7 +162,6 @@ def process_job(job):
             update_job_status(
                 job_id, "queued", stage="retrying", progress=0.0, error_message=str(e)
             )
-            requeue_job(job_id)
         else:
             update_job_status(
                 job_id, "failed", stage="failed", progress=0.0, error_message=str(e)

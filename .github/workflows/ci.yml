@@ -54,7 +54,7 @@ jobs:
     # new CI run triggered by that push will validate the fixed code.
     # On pull_request events, always run: auto-fix cannot push, so lint must
     # surface any remaining issues to block the PR.
-    if: needs.ruff-auto-fix.outputs.changed == 'false' || github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' || needs.ruff-auto-fix.outputs.changed == 'false'
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
