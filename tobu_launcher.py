@@ -15,13 +15,15 @@ def _can_prompt_for_input():
     stdin = getattr(sys, "stdin", None)
     return _stdio_stream_available(stdin) and stdin.isatty()
 
+
 if __name__ == "__main__":
     multiprocessing.freeze_support()
-    
+
     # Import the app using absolute import
     try:
         from backend.search_and_index.api_app import app
         import uvicorn
+
         print("[TOBU] Launcher starting backend...")
 
         uvicorn_kwargs = {}
@@ -34,6 +36,7 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"[TOBU] Launcher Error: {e}")
         import traceback
+
         traceback.print_exc()
         if _can_prompt_for_input():
             input("Press Enter to close...")

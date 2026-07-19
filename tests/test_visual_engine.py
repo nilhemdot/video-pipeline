@@ -123,9 +123,10 @@ class TestIndexVideoVisually:
         mock_model.encode.return_value.tolist.return_value = [[0.1, 0.2]]
         mock_get_model.return_value = mock_model
 
-        with patch("backend.search_and_index.visual_engine.cv2") as mock_cv2, patch(
-            "backend.search_and_index.visual_engine.Image"
-        ) as mock_pil:
+        with (
+            patch("backend.search_and_index.visual_engine.cv2") as mock_cv2,
+            patch("backend.search_and_index.visual_engine.Image") as mock_pil,
+        ):
             mock_cap = MagicMock()
             mock_cap.get.side_effect = [30.0, True]  # FPS=30, first read=True
             # Simulate: first read succeeds, then EOF
@@ -156,8 +157,9 @@ class TestIndexVideoVisually:
         mock_model.encode.return_value.tolist.return_value = [[0.1]]
         mock_get_model.return_value = mock_model
 
-        with patch("backend.search_and_index.visual_engine.cv2") as mock_cv2, patch(
-            "backend.search_and_index.visual_engine.Image"
+        with (
+            patch("backend.search_and_index.visual_engine.cv2") as mock_cv2,
+            patch("backend.search_and_index.visual_engine.Image"),
         ):
             mock_cap = MagicMock()
             mock_cap.get.side_effect = [30.0]
